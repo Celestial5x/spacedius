@@ -32,7 +32,7 @@ Used to display the final score after a game over and transitions to the Enter H
 Used to enter a new high score with player input in the form of three characters.
 ## Classes
 ### Asteroid Class
-Represents asteroids that act as obstacles in the game which blocks player bullets.  Asteroids can be destroyed by missiles.  If the player ship collides with an asteroid then the game is over.  This provides a challenge to the player that restricts player bullets and navigation but can be destroyed if missile power up is obtained.
+Represents asteroids that act as obstacles in the game which blocks player bullets.  Asteroids can be destroyed by missiles.  If the player ship collides with an asteroid then the game is over.  This provides a challenge to the player that restricts player bullets from reaching enemy ships and also restricts navigation but they can be destroyed if missile power up is obtained.
 ### Boss Class
 Represents the boss that spawns after the player score reaches a threshold which has health that scales with the level.
 ### Bullet Class
