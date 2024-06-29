@@ -46,7 +46,7 @@ Represents option powerup for the player ship that mirrors the player bullets (a
 ### Plane Class
 Represents the enemy ships that spawn from the right edge of the screen.  These enemy ships shoot bullets toward the player ship.
 ### Player Class
-Represents the ship which the player controls in the game by shooting bullets and/or missiles.
+Represents the ship which the player controls in the game by navigating and shooting bullets and/or missiles.
 ### Powerup Class
 Represents powerups that spawn after enemy ships are destroyed at a random chance.  The player can obtain either the missile or option powerup.
 ### Progress Bar Class
