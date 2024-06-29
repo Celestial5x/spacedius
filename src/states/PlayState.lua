@@ -8,8 +8,10 @@
     mchi1@ualberta.ca
 
     The PlayState class is the bulk of the game, where the player actually controls the player ship and
-    avoids asteroids, enemy ships, and bullets. When the player collides with an asteroid, enemy ships, 
-    or bullets, we should go to the GameOver state, where we then go back to the high score stae or main menu.
+    avoids asteroids, enemy ships, and bullets. Player can collect powerups that spawn at a random chance 
+    when defeating enemy ships. Levels are gained after defeating a boss which spawns after reaching a 
+    player score threshold.When the player collides with an asteroid, enemy ships, or bullets, we should 
+    go to the GameOver state, where we then go back to the high score state or main menu.
 ]]
 
 PlayState = Class{__includes = BaseState}
@@ -21,9 +23,9 @@ function PlayState:init()
     self.score = 0
     self.bullets = {}
     self.playerBulletTimer = 0
-    self.spawnPlane = math.random(2,5)
-    self.spawnAsteroid = math.random(5,10)
-    self.spawnBullet = math.random(1,2)
+    self.spawnPlane = math.random(2, 5)
+    self.spawnAsteroid = math.random(4, 8)
+    self.spawnBullet = math.random(1, 2)
     self.bulletTimer = 0
     self.asteroidTimer = 0
     self.asteroids = {}
@@ -36,7 +38,7 @@ function PlayState:init()
     self.boss = nil
     self.bossPoints = 1500
     self.bossBulletTimer = 0
-    self.bossShoot = math.random(1,2)
+    self.bossShoot = math.random(1, 2)
     self.bossSpawnTimer = 0
     self.level = 1
 end
@@ -67,6 +69,7 @@ function PlayState:update(dt)
 
         if love.keyboard.isDown('space') then
             table.insert(self.bullets, Bullet(self.player.x + self.player.width - 16, self.player.y + self.player.height / 2 - 19, 1))
+            gSounds['pause']:setVolume(0.5)
             gSounds['laser2']:play()
 
             if self.toggleMissile then
@@ -90,16 +93,16 @@ function PlayState:update(dt)
 
     -- spawn planes randomly 
     if self.planeTimer > self.spawnPlane then
-        local y = math.random(VIRTUAL_HEIGHT)
+        local y = math.random(VIRTUAL_HEIGHT - 32)
 
         for i = 1, math.random(2) + self.level do
-        -- add 1 to level + 2 planes randomly at right edge of the screen
-            table.insert(self.planes, Plane(math.max(0, y - 20 * math.random(4,6)), math.random(4)))
+        -- add a random number planes at the right edge of the screen
+            table.insert(self.planes, Plane(math.max(0, y - 25 * math.random(2, 10)), math.random(4)))
         end
 
         -- reset timer
         self.planeTimer = 0
-        self.spawnPlane = math.random(2,4)
+        self.spawnPlane = math.random(2, 4)
     end
 
     -- for every plane..
@@ -127,6 +130,7 @@ function PlayState:update(dt)
                 end
             end
             gSounds['explosion1']:stop()            
+            gSounds['explosion1']:setVolume(0.5)            
             gSounds['explosion1']:play()
             self.score = self.score + 100  + 10 * (self.level - 1)
             table.remove(self.planes, k)
@@ -154,7 +158,7 @@ function PlayState:update(dt)
         
         -- reset timer
         self.asteroidTimer = 0
-        self.spawnAsteroid = math.random(5,10)
+        self.spawnAsteroid = math.random(4, 8)
     end
 
     -- for every asteroid..
@@ -185,11 +189,12 @@ function PlayState:update(dt)
     self.bulletTimer = self.bulletTimer + dt
 
     if #self.planes > 0 then
-           
         if self.bulletTimer > self.spawnBullet then
+            -- chance to shoot bullet towards the player
             for k, plane in pairs(self.planes) do      
                 if math.random(2) == 1 and plane.x < VIRTUAL_WIDTH then
                     table.insert(self.bullets, Bullet(self.planes[k].x - 8, self.planes[k].y - 8, 3, self.player.x, self.player.y))
+                    gSounds['laser1']:setVolume(0.5)
                     gSounds['laser1']:play()
                 end
                 self.bulletTimer = 0
@@ -203,7 +208,7 @@ function PlayState:update(dt)
         bullet:update(dt)
     end
 
-    -- remove player bullets (blue) if it passes right edge of screen or enemy bullets (red or yellow) it if passes left edge of screen
+    -- remove player bullets (blue) if it passes the right edge of screen or enemy bullets (red or yellow) it if passes the left edge of screen
     for k, bullet in pairs(self.bullets) do
         if bullet.x > VIRTUAL_WIDTH and bullet.skin == 1 or bullet.x < -30 then
             table.remove(self.bullets, k)
@@ -213,14 +218,14 @@ function PlayState:update(dt)
     -- detect player bullet collision with planes and does damage
     for k, bullet in pairs(self.bullets) do
         for l, plane in pairs(self.planes) do
-            if plane:collides(bullet) and bullet.skin == 1 and bullet.x < VIRTUAL_WIDTH then
+            if plane:collides(bullet) and bullet.skin == 1 and bullet.x < VIRTUAL_WIDTH - 16 then
                 plane:damage(1)
                 table.remove(self.bullets, k)
             end
 
         end
 
-        -- detect enemy bullet collision with player and goes to GameOver state
+        -- detect enemy bullet collision with player and goes to Game Over state
         if bullet.skin ~= 1 then
             if self.player:collides(bullet) then
                 gSounds['explosion1']:play()
@@ -249,30 +254,36 @@ function PlayState:update(dt)
 
 
     for k, powerup in pairs(self.powerups) do
-        -- option powerup; the number of powerups is restricted to the level up to a maximum of 4
+        -- option powerup; the number of options the player has is restricted to the level up to a maximum of 4
         if powerup:collides(self.player) and #self.options < 4 and powerup.type == 1 then
             if #self.options == 0 and self.level > #self.options then
+                gSounds['pickup']:stop()
                 gSounds['pickup']:play()
                 table.insert(self.options, Option(self.player.x, self.player.y, 1))
                 table.remove(self.powerups, k)
             elseif #self.options == 1 and self.level > #self.options then
+                gSounds['pickup']:stop()
                 gSounds['pickup']:play()
                 table.insert(self.options, Option(self.player.x, self.player.y, 2))
                 table.remove(self.powerups, k)
             elseif #self.options == 2 and self.level > #self.options then
+                gSounds['pickup']:stop()
                 gSounds['pickup']:play()
                 table.insert(self.options, Option(self.player.x, self.player.y, 3))
                 table.remove(self.powerups, k)
             elseif #self.options == 3 and self.level > #self.options then
+                gSounds['pickup']:stop()
                 gSounds['pickup']:play()
                 table.insert(self.options, Option(self.player.x, self.player.y, 4))
                 table.remove(self.powerups, k)
             else
                 table.remove(self.powerups, k)
             end
+
         -- missile power up
         elseif powerup:collides(self.player) and not self.toggleMissile and powerup.type == 2 then
             self.toggleMissile = true
+            gSounds['pickup']:stop()
             gSounds['pickup']:play()
         elseif powerup:collides(self.player) then
             table.remove(self.powerups, k)
@@ -288,6 +299,7 @@ function PlayState:update(dt)
         for k, option in pairs(self.options) do
             option:update(self.player.x, self.player.y, self.optionTimer, #self.options)
         end
+        -- updates timer for rotation around the ship
         if self.optionTimer < 720 then
                 self.optionTimer = self.optionTimer + 1
             else
@@ -319,6 +331,7 @@ function PlayState:update(dt)
         -- detect missile collision with asteroid and removes asteroid
         for l, asteroid in pairs(self.asteroids) do
             if missile:collides(asteroid) then
+                gSounds['explosion2']:stop()
                 gSounds['explosion2']:play()
                 table.remove(self.missiles, k)
                 table.remove(self.asteroids, l)
@@ -329,6 +342,7 @@ function PlayState:update(dt)
     -- if player score exceeds a threshold, then give a warning and spawn the boss after 6 seconds
     if self.score > self.bossPoints and not self.toggleBoss then
         self.bossSpawnTimer = self.bossSpawnTimer + dt
+        gSounds['siren']:setVolume(0.75)
         gSounds['siren']:play()
         if self.bossSpawnTimer > 6 then
             self.toggleBoss = true
@@ -369,9 +383,21 @@ function PlayState:update(dt)
         self.bossBulletTimer = self.bossBulletTimer + dt
         
         -- spawn boss bullets
-        if self.bossBulletTimer > self.bossShoot then
+        
+        if self.bossBulletTimer > self.bossShoot / 1.5 and math.random(100) == 1 then
             table.insert(self.bullets, Bullet(self.boss.x, self.boss.y + 24, 2))
             table.insert(self.bullets, Bullet(self.boss.x, self.boss.y + 96, 2))
+            gSounds['laser']:stop()                
+            gSounds['laser']:setVolume(0.5)
+            gSounds['laser']:play()
+        end
+
+        if self.bossBulletTimer > self.bossShoot then
+
+            table.insert(self.bullets, Bullet(self.boss.x, self.boss.y + 24, 2))
+            table.insert(self.bullets, Bullet(self.boss.x, self.boss.y + 96, 2))
+            gSounds['laser']:stop()                
+            gSounds['laser']:setVolume(0.5)
             gSounds['laser']:play()
             self.bossBulletTimer = 0
             self.bossShoot = math.random(1,2)
@@ -381,6 +407,7 @@ function PlayState:update(dt)
         for k, bullet in pairs(self.bullets) do
             if self.boss:collides(bullet) and bullet.skin == 1 then
                 self.boss:damage(1)
+                gSounds['wall-hit']:stop()
                 gSounds['wall-hit']:play()
                 table.remove(self.bullets, k)
             end
@@ -390,12 +417,13 @@ function PlayState:update(dt)
         for k, missile in pairs(self.missiles) do
             if self.boss:collides(missile) then
                 self.boss:damage(1)
+                gSounds['wall-hit']:stop()
                 gSounds['wall-hit']:play()
                 table.remove(self.missiles, k)
             end
         end
 
-        -- if boss health falls below 0 then boss is destroyed; awards points, updates next threshold for next boss spawn and increases level
+        -- if boss health falls below 0 then boss is destroyed; awards points, updates next player score threshold for next boss spawn and increases level
         if self.boss.health <= 0 then
             self.boss = nil
             self.toggleBoss = false
@@ -403,6 +431,7 @@ function PlayState:update(dt)
             self.score = self.score + 5000  + 500 * self.level
             self.level = self.level + 1
             self.bossPoints = self.bossPoints + 5000 + 2500 * self.level 
+            gSounds['levelup']:setVolume(0.5)
             gSounds['levelup']:play()
         end
     end
@@ -439,11 +468,6 @@ function PlayState:render()
         end
     end
 
-    if self.paused then
-    love.graphics.setFont(gFonts['zelda'])
-        love.graphics.printf("PAUSED", 0, VIRTUAL_HEIGHT/2 - 32, VIRTUAL_WIDTH, 'center')
-    end
-
     for k, bullet in pairs(self.bullets) do
         bullet:render()
     end
@@ -456,5 +480,11 @@ function PlayState:render()
         love.graphics.setFont(gFonts['zelda'])
         love.graphics.setColor(255, 0, 0, 1)
         love.graphics.printf("WARNING!", 0, VIRTUAL_HEIGHT/2 - 32, VIRTUAL_WIDTH, 'center')
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+
+    if self.paused then
+    love.graphics.setFont(gFonts['zelda'])
+        love.graphics.printf("PAUSED", 0, VIRTUAL_HEIGHT/2 - 32, VIRTUAL_WIDTH, 'center')
     end
 end

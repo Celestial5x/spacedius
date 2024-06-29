@@ -5,7 +5,7 @@
     mchi1@ualberta.ca
 
     The TitleScreenState is the starting screen of the game, shown on startup. It should
-    display "Press Enter" and also our highest score.
+    display "Start" and "High Scores".
 ]]
 
 TitleScreenState = Class{__includes = BaseState}

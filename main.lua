@@ -36,6 +36,7 @@ function love.load()
 
     -- kick off music
     gSounds['music']:setLooping(true)
+    gSounds['music']:setVolume(0.5)
     gSounds['music']:play()
 
     -- initialize our virtual resolution
