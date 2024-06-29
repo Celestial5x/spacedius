@@ -1,6 +1,6 @@
 # Spacedius
 
-Spacedius is 2D side-scrolling shoot-em-up remake of Gradius
+Spacedius is 2D side-scrolling shoot-em-up remake of Gradius.
 
 # Instructions
 
