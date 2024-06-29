@@ -25,7 +25,7 @@ Used as the starting screen of the game and transitions to either the Countdown 
 ### Countdown State
 Used to countdown before the game begins and transitions to the Play State.
 ### Play State
-The Play State is the bulk of the game where the player ship interacts with other classes.  Timers are used to spawn enemy ships, enemy bullets and asteroids at random intervals.  If the player ship collides with enemy ships, bullets, or asteroids, then the game is over and transitions to the Game Over state.
+The Play State is the bulk of the game where the player ship interacts with other classes.  Powerups drop with a random chance after defeating enemy ships.  Timers are used to spawn enemy ships, enemy bullets and asteroids at random intervals.  If the player ship collides with enemy ships, bullets, or asteroids, then the game is over and transitions to the Game Over state.
 ### Game Over State
 Used to display the final score after a game over and transitions to the Enter High Score State or back ot the Title Screen State.
 ### Enter High Score State
