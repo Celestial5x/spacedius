@@ -14,7 +14,7 @@ Press or hold the **Space Bar** to shoot.
 
 Press **P** to pause the game.
 
-Press **Esc** or quit the game.
+Press **Esc** to quit the game.
 
 # Documentation
 ## States 
