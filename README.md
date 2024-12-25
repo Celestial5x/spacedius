@@ -1,5 +1,8 @@
 # Spacedius
 
+#### Video Demo:
+https://youtu.be/u7RoIqj4RqA 
+#### Description:
 Spacedius is 2D side-scrolling shoot-em-up remake of Gradius.
 
 # Instructions
